@@ -14,7 +14,6 @@ from telegram import (
     ReplyKeyboardMarkup,
     Update,
 )
-from telegram.constants import KeyboardButtonStyle as KBS
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -24,9 +23,21 @@ from telegram.ext import (
     filters,
 )
 
+# ==================== MANUAL KBS (for colored buttons) ====================
+
+class KBS:
+    PRIMARY = "primary"
+    SECONDARY = "secondary"
+    SUCCESS = "success"
+    DANGER = "danger"
+    WARNING = "warning"
+    INFO = "info"
+    LIGHT = "light"
+    DARK = "dark"
+
 # ==================== CONFIGURATION ====================
 
-BOT_TOKEN = "8450924080:AAGg8CPY6VGxHMmBAnQulRdVb8brx-5PEuw"
+BOT_TOKEN = "8450924080:AAF8HhCZ4wMzmd3yq1XZvSXz0Zfg0hVMBdg"
 ADMIN_IDS = [8478266638]
 
 # ==================== LOAD COUNTRIES FROM JSON FILE ====================
@@ -645,22 +656,7 @@ async def show_get_number(query, context, user_id, first_name):
     db_exec("UPDATE users SET last_active = ? WHERE user_id = ?",
             (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
 
-    number, country, service, expiry = get_user_current_number(user_id)
-    if number:
-        msg, kb = format_number_message(country, service, number, first_name)
-        try:
-            await query.edit_message_text(
-                msg,
-                reply_markup=kb,
-                parse_mode='Markdown')
-        except Exception:
-            await context.bot.send_message(
-                user_id,
-                msg,
-                reply_markup=kb,
-                parse_mode='Markdown')
-        return
-
+    # ALWAYS show country selection (ignore any existing active number)
     countries = db_fetch_all(
         "SELECT name, service, stock FROM countries WHERE active = 1 AND stock > 0 ORDER BY name")
 
@@ -1595,14 +1591,7 @@ async def send_get_number_panel(update: Update, context: ContextTypes.DEFAULT_TY
     db_exec("UPDATE users SET last_active = ? WHERE user_id = ?",
             (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
 
-    number, country, service, expiry = get_user_current_number(user_id)
-    if number:
-        msg, kb = format_number_message(country, service, number, first_name)
-        await update.message.reply_text(
-            msg,
-            reply_markup=kb, parse_mode='Markdown')
-        return
-
+    # ALWAYS show country selection (ignore any existing active number)
     countries = db_fetch_all(
         "SELECT name, service, stock FROM countries WHERE active = 1 AND stock > 0 ORDER BY name")
     if not countries:
@@ -1716,7 +1705,7 @@ def main():
     print("✅ Country & Service Manager Integrated")
     print("✅ Referral & Credits Removed")
     print("✅ Keyboard Layout: 2x2 then 1x1 (+ admin 1x1)")
-    print("✅ New Number Format Applied")
+    print("✅ Get Number always shows selection")
     print("🔄 Starting polling...")
 
     application.run_polling(drop_pending_updates=True)
