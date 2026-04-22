@@ -25,15 +25,6 @@ from telegram.ext import (
 
 # ==================== MANUAL KBS (for colored buttons) ====================
 
-class KBS:
-    PRIMARY = "primary"
-    SECONDARY = "secondary"
-    SUCCESS = "success"
-    DANGER = "danger"
-    WARNING = "warning"
-    INFO = "info"
-    LIGHT = "light"
-    DARK = "dark"
 
 # ==================== CONFIGURATION ====================
 
